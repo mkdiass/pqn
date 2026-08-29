@@ -4,12 +4,16 @@ import { useState } from "react";
 import { ArrowRight, Loader2, MapPin, Search } from "lucide-react";
 
 import { getAddressByCep } from "@/lib/cep";
+import { checkCoverage } from "@/lib/coverage";
+import { CoverageResult } from "./coverage-result";
 
 export function CoverageForm() {
   const [cep, setCep] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [addressFound, setAddressFound] = useState(false);
+  const [coverageChecked, setCoverageChecked] = useState(false);
+  const [hasCoverage, setHasCoverage] = useState(false);
 
   const [address, setAddress] = useState({
     street: "",
@@ -31,13 +35,12 @@ export function CoverageForm() {
     return numbers;
   }
 
-  function handleCepChange(
-    event: React.ChangeEvent<HTMLInputElement>
-  ) {
+  function handleCepChange(event: React.ChangeEvent<HTMLInputElement>) {
     const formattedCep = formatCep(event.target.value);
 
     setCep(formattedCep);
     setAddressFound(false);
+    setCoverageChecked(false);
     setError("");
   }
 
@@ -52,6 +55,7 @@ export function CoverageForm() {
     setLoading(true);
     setError("");
     setAddressFound(false);
+    setCoverageChecked(false);
 
     try {
       const result = await getAddressByCep(cleanCep);
@@ -60,7 +64,6 @@ export function CoverageForm() {
         setError(
           "Não encontramos esse CEP. Verifique os números e tente novamente."
         );
-
         return;
       }
 
@@ -71,17 +74,22 @@ export function CoverageForm() {
         state: result.state,
       });
 
+      setNumber("");
+      setComplement("");
       setAddressFound(true);
     } catch {
-      setError(
-        "Não foi possível consultar o CEP. Tente novamente."
-      );
+      setError("Não foi possível consultar o CEP. Tente novamente.");
     } finally {
       setLoading(false);
     }
   }
 
   function handleCoverageSearch() {
+    if (!addressFound) {
+      setError("Primeiro consulte um CEP válido.");
+      return;
+    }
+
     if (!number.trim()) {
       setError("Digite o número do endereço.");
       return;
@@ -89,231 +97,181 @@ export function CoverageForm() {
 
     setError("");
 
-    console.log({
-      cep,
+    const result = checkCoverage({
       street: address.street,
-      number,
       neighborhood: address.neighborhood,
       city: address.city,
       state: address.state,
-      complement,
     });
 
-    /*
-      Próxima etapa:
-
-      Aqui vamos consultar:
-
-      lib/coverage.ts
-
-      para verificar se existe cobertura
-      nesse endereço.
-    */
+    setHasCoverage(result);
+    setCoverageChecked(true);
   }
 
   return (
-    <section className="coverage-form-section">
-      <div className="coverage-form-container">
+    <>
+      <section className="coverage-form-section">
+        <div className="coverage-form-container">
+          <div className="coverage-form-heading">
+            <span>CONSULTE SUA COBERTURA</span>
 
-        <div className="coverage-form-heading">
-
-          <span>CONSULTE SUA COBERTURA</span>
-
-          <h2>
-            Descubra se a Parque Net
-            <br />
-            <strong>chega até você.</strong>
-          </h2>
-
-          <p>
-            Digite seu CEP para encontrarmos seu endereço
-            e verificarmos a disponibilidade da nossa rede.
-          </p>
-
-        </div>
-
-        <div className="coverage-form-card">
-
-          <div className="coverage-form-card-header">
-
-            <div className="coverage-form-card-icon">
-              <MapPin size={22} />
-            </div>
-
-            <div>
-              <h3>Qual é o seu endereço?</h3>
-
-              <p>
-                Comece informando seu CEP.
-              </p>
-            </div>
-
-          </div>
-
-          <div className="coverage-form">
-
-            <div className="coverage-field coverage-cep-field">
-
-              <label htmlFor="cep">
-                CEP
-              </label>
-
-              <div className="coverage-cep-input">
-
-                <input
-                  id="cep"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="00000-000"
-                  value={cep}
-                  onChange={handleCepChange}
-                  maxLength={9}
-                />
-
-                <button
-                  type="button"
-                  onClick={handleSearchCep}
-                  disabled={
-                    loading ||
-                    cep.replace(/\D/g, "").length !== 8
-                  }
-                >
-                  {loading ? (
-                    <Loader2
-                      size={19}
-                      className="coverage-loading"
-                    />
-                  ) : (
-                    <>
-                      <Search size={18} />
-                      Buscar endereço
-                    </>
-                  )}
-                </button>
-
-              </div>
-
-              {error && (
-                <p className="coverage-form-error">
-                  {error}
-                </p>
-              )}
-
-              <a
-                href="https://buscacepinter.correios.com.br/app/endereco/index.php"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="coverage-cep-help"
-              >
-                Não sabe seu CEP?
-              </a>
-
-            </div>
-
-            {addressFound && (
-              <div className="coverage-address-fields">
-
-                <div className="coverage-field">
-                  <label htmlFor="street">
-                    Rua
-                  </label>
-
-                  <input
-                    id="street"
-                    type="text"
-                    value={address.street}
-                    readOnly
-                  />
-                </div>
-
-                <div className="coverage-field coverage-number-field">
-                  <label htmlFor="number">
-                    Número
-                  </label>
-
-                  <input
-                    id="number"
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="Ex.: 123"
-                    value={number}
-                    onChange={(event) =>
-                      setNumber(
-                        event.target.value.replace(/\D/g, "")
-                      )
-                    }
-                  />
-                </div>
-
-                <div className="coverage-field">
-                  <label htmlFor="neighborhood">
-                    Bairro
-                  </label>
-
-                  <input
-                    id="neighborhood"
-                    type="text"
-                    value={address.neighborhood}
-                    readOnly
-                  />
-                </div>
-
-                <div className="coverage-field">
-                  <label htmlFor="city">
-                    Cidade
-                  </label>
-
-                  <input
-                    id="city"
-                    type="text"
-                    value={address.city}
-                    readOnly
-                  />
-                </div>
-
-                <div className="coverage-field">
-                  <label htmlFor="complement">
-                    Complemento
-                    <span>Opcional</span>
-                  </label>
-
-                  <input
-                    id="complement"
-                    type="text"
-                    placeholder="Apartamento, bloco..."
-                    value={complement}
-                    onChange={(event) =>
-                      setComplement(event.target.value)
-                    }
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  className="coverage-submit-button"
-                  onClick={handleCoverageSearch}
-                >
-                  Consultar cobertura
-                  <ArrowRight size={19} />
-                </button>
-
-              </div>
-            )}
-
-          </div>
-
-          <div className="coverage-form-security">
-            <span>🔒</span>
+            <h2>
+              Descubra se a Parque Net
+              <br />
+              <strong>chega até você.</strong>
+            </h2>
 
             <p>
-              Seus dados são utilizados apenas para verificar
-              a disponibilidade da nossa rede.
+              Digite seu CEP para encontrarmos seu endereço e verificarmos a
+              disponibilidade da nossa rede.
             </p>
           </div>
 
-        </div>
+          <div className="coverage-form-card">
+            <div className="coverage-form-card-header">
+              <div className="coverage-form-card-icon">
+                <MapPin size={22} />
+              </div>
 
-      </div>
-    </section>
+              <div>
+                <h3>Qual é o seu endereço?</h3>
+                <p>Comece informando seu CEP.</p>
+              </div>
+            </div>
+
+            <div className="coverage-form">
+              <div className="coverage-field coverage-cep-field">
+                <label htmlFor="cep">CEP</label>
+
+                <div className="coverage-cep-input">
+                  <input
+                    id="cep"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="00000-000"
+                    value={cep}
+                    onChange={handleCepChange}
+                    maxLength={9}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleSearchCep}
+                    disabled={
+                      loading || cep.replace(/\D/g, "").length !== 8
+                    }
+                  >
+                    {loading ? (
+                      <Loader2 size={19} className="coverage-loading" />
+                    ) : (
+                      <>
+                        <Search size={18} />
+                        Buscar endereço
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {error && (
+                  <p className="coverage-form-error">{error}</p>
+                )}
+
+                <a
+                  href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="coverage-cep-help"
+                >
+                  Não sabe seu CEP?
+                </a>
+              </div>
+
+              {addressFound && (
+                <div className="coverage-address-fields">
+                  <div className="coverage-field">
+                    <label htmlFor="street">Rua</label>
+                    <input
+                      id="street"
+                      type="text"
+                      value={address.street}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="coverage-field coverage-number-field">
+                    <label htmlFor="number">Número</label>
+                    <input
+                      id="number"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Ex.: 123"
+                      value={number}
+                      onChange={(event) =>
+                        setNumber(event.target.value.replace(/\D/g, ""))
+                      }
+                    />
+                  </div>
+
+                  <div className="coverage-field">
+                    <label htmlFor="neighborhood">Bairro</label>
+                    <input
+                      id="neighborhood"
+                      type="text"
+                      value={address.neighborhood}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="coverage-field">
+                    <label htmlFor="city">Cidade</label>
+                    <input
+                      id="city"
+                      type="text"
+                      value={address.city}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="coverage-field">
+                    <label htmlFor="complement">
+                      Complemento
+                      <span>Opcional</span>
+                    </label>
+                    <input
+                      id="complement"
+                      type="text"
+                      placeholder="Apartamento, bloco..."
+                      value={complement}
+                      onChange={(event) => setComplement(event.target.value)}
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    className="coverage-submit-button"
+                    onClick={handleCoverageSearch}
+                  >
+                    Consultar cobertura
+                    <ArrowRight size={19} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="coverage-form-security">
+              <span>🔒</span>
+              <p>
+                Seus dados são utilizados apenas para verificar a
+                disponibilidade da nossa rede.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {coverageChecked && (
+        <CoverageResult hasCoverage={hasCoverage} />
+      )}
+    </>
   );
 }
