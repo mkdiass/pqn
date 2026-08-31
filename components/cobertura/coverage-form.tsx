@@ -32,7 +32,7 @@ export function CoverageForm({
 
   const [number, setNumber] = useState("");
   const [complement, setComplement] = useState("");
-  const resultRef = useRef<HTMLElement | null>(null);
+  const resultRef = useRef<HTMLDivElement | null>(null);
 
   function formatCep(value: string) {
     const numbers = value.replace(/\D/g, "").slice(0, 8);
@@ -147,10 +147,7 @@ export function CoverageForm({
 
   return (
     <>
-      <section
-        id="coverage-consulta"
-        className="coverage-form-section"
-      >
+      <section id="coverage-consulta" className="coverage-form-section">
         <div className="coverage-form-container">
           <div className="coverage-form-heading">
             <span>CONSULTE SUA COBERTURA</span>
