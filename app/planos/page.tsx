@@ -4,7 +4,15 @@ import { PlansGrid } from "@/components/planos/plans-grid";
 import { PlansBenefits } from "@/components/planos/plans-benefits";
 import { PlansCta } from "@/components/planos/plans-cta";
 
-export default function PlansPage() {
+type PlansPageProps = {
+  searchParams: Promise<{ selecionado?: string | string[] }>;
+};
+
+export default async function PlansPage({ searchParams }: PlansPageProps) {
+  const params = await searchParams;
+  const rawSelected = params.selecionado;
+  const selectedPlan = Array.isArray(rawSelected) ? rawSelected[0] : rawSelected;
+
   return (
     <>
       <Navbar />
@@ -17,7 +25,7 @@ export default function PlansPage() {
             <div className="pn-flow-step"><strong>3. Continue a contratação</strong>Fale com nossa equipe.</div>
           </div>
         </section>
-        <PlansGrid />
+        <PlansGrid selectedPlan={selectedPlan} />
         <PlansBenefits />
         <PlansCta />
       </main>
