@@ -1,20 +1,9 @@
-"use client";
-
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import { plans } from "@/data/plans";
 import { PlanCard } from "./plan-card";
 
-export function PlansGrid() {
-  const searchParams = useSearchParams();
-  const selectedPlan = searchParams.get("selecionado");
+type PlansGridProps = { selectedPlan?: string };
 
-  useEffect(() => {
-    if (!selectedPlan) return;
-    const element = document.getElementById(`plano-${selectedPlan}`);
-    element?.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, [selectedPlan]);
-
+export function PlansGrid({ selectedPlan = "" }: PlansGridProps) {
   return (
     <section className="plans-grid-section" id="planos">
       <div className="plans-grid-container">
@@ -26,18 +15,13 @@ export function PlansGrid() {
 
         {selectedPlan && (
           <div className="pn-selected-plan-card">
-            <div>
-              <strong>Você estava escolhendo o plano de {selectedPlan} Mega.</strong>
-              <span>Ele ficou destacado para você continuar a contratação.</span>
-            </div>
+            <div><strong>Você estava escolhendo o plano de {selectedPlan} Mega.</strong><span>Ele ficou destacado para você continuar a contratação.</span></div>
             <a href="#planos">Ver plano selecionado</a>
           </div>
         )}
 
         <div className="full-plans-grid">
-          {plans.map((plan) => (
-            <PlanCard key={plan.speed} {...plan} selected={selectedPlan === plan.speed} />
-          ))}
+          {plans.map((plan) => <PlanCard key={plan.speed} {...plan} selected={selectedPlan === plan.speed} />)}
         </div>
       </div>
     </section>
