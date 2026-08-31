@@ -1,13 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Loader2, MapPin, Search } from "lucide-react";
 
 import { getAddressByCep } from "@/lib/cep";
 import { checkCoverage } from "@/lib/coverage";
 import { CoverageResult } from "./coverage-result";
 
-export function CoverageForm() {
+type CoverageFormProps = {
+  initialCep?: string;
+  autoSearchToken?: number;
+};
+
+export function CoverageForm({
+  initialCep = "",
+  autoSearchToken = 0,
+}: CoverageFormProps) {
   const [cep, setCep] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,6 +32,7 @@ export function CoverageForm() {
 
   const [number, setNumber] = useState("");
   const [complement, setComplement] = useState("");
+  const resultRef = useRef<HTMLDivElement | null>(null);
 
   function formatCep(value: string) {
     const numbers = value.replace(/\D/g, "").slice(0, 8);
@@ -35,18 +44,7 @@ export function CoverageForm() {
     return numbers;
   }
 
-  function handleCepChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const formattedCep = formatCep(event.target.value);
-
-    setCep(formattedCep);
-    setAddressFound(false);
-    setCoverageChecked(false);
-    setError("");
-  }
-
-  async function handleSearchCep() {
-    const cleanCep = cep.replace(/\D/g, "");
-
+  const searchCep = useCallback(async (cleanCep: string, shouldScroll = false) => {
     if (cleanCep.length !== 8) {
       setError("Digite um CEP válido.");
       return;
@@ -77,11 +75,43 @@ export function CoverageForm() {
       setNumber("");
       setComplement("");
       setAddressFound(true);
+
+      if (shouldScroll) {
+        requestAnimationFrame(() => {
+          document.getElementById("coverage-consulta")?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        });
+      }
     } catch {
       setError("Não foi possível consultar o CEP. Tente novamente.");
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    if (!autoSearchToken || !initialCep) {
+      return;
+    }
+
+    const cleanCep = initialCep.replace(/\D/g, "");
+    setCep(formatCep(cleanCep));
+    void searchCep(cleanCep, true);
+  }, [autoSearchToken, initialCep, searchCep]);
+
+  function handleCepChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const formattedCep = formatCep(event.target.value);
+
+    setCep(formattedCep);
+    setAddressFound(false);
+    setCoverageChecked(false);
+    setError("");
+  }
+
+  function handleSearchCep() {
+    void searchCep(cep.replace(/\D/g, ""));
   }
 
   function handleCoverageSearch() {
@@ -106,11 +136,18 @@ export function CoverageForm() {
 
     setHasCoverage(result);
     setCoverageChecked(true);
+
+    requestAnimationFrame(() => {
+      resultRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
   }
 
   return (
     <>
-      <section className="coverage-form-section">
+      <section id="coverage-consulta" className="coverage-form-section">
         <div className="coverage-form-container">
           <div className="coverage-form-heading">
             <span>CONSULTE SUA COBERTURA</span>
@@ -151,6 +188,12 @@ export function CoverageForm() {
                     placeholder="00000-000"
                     value={cep}
                     onChange={handleCepChange}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        handleSearchCep();
+                      }
+                    }}
                     maxLength={9}
                   />
 
@@ -270,7 +313,9 @@ export function CoverageForm() {
       </section>
 
       {coverageChecked && (
-        <CoverageResult hasCoverage={hasCoverage} />
+        <div ref={resultRef}>
+          <CoverageResult hasCoverage={hasCoverage} />
+        </div>
       )}
     </>
   );
