@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { CoverageHero } from "@/components/cobertura/coverage-hero";
 import { CoverageForm } from "@/components/cobertura/coverage-form";
@@ -26,7 +26,9 @@ export default function CoveragePage() {
             <div className="pn-flow-step"><strong>3. Continue a contratação</strong>Fale com nossa equipe.</div>
           </div>
         </section>
-        <CoverageForm initialCep={heroCep} autoSearchToken={heroRequest} />
+        <Suspense fallback={<div className="coverage-form-section" aria-hidden="true" />}>
+          <CoverageForm initialCep={heroCep} autoSearchToken={heroRequest} />
+        </Suspense>
       </main>
     </>
   );
