@@ -14,6 +14,11 @@ export const coverageLocations: CoverageLocation[] = [
       "Campo Limpo",
       "Capão Redondo",
       "Jardim São Luís",
+      "Parque Maria Helena",
+      "Jardim Capelinha",
+      "Vila Prel",
+      "Pirajussara",
+      "Jardim Campo Limpo",
     ],
 
     streets: [
@@ -21,8 +26,7 @@ export const coverageLocations: CoverageLocation[] = [
       "Avenida Carlos Lacerda",
       "Rua João Caetano",
       "Rua Doutor Luís da Fonseca Galvão",
+      "Rua Matteo Raverti",
     ],
   },
-
-  // Novas regiões poderão ser adicionadas aqui.
 ];
