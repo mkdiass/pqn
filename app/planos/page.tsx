@@ -1,20 +1,8 @@
-import { Navbar } from "@/components/layout/navbar";
-import { PlansHero } from "@/components/planos/plans-hero";
-import { PlansGrid } from "@/components/planos/plans-grid";
-import { PlansBenefits } from "@/components/planos/plans-benefits";
-import { PlansCta } from "@/components/planos/plans-cta";
+import Link from "next/link";
+import { ArrowRight, Check, Wifi } from "lucide-react";
+import { Reveal } from "@/components/project/reveal";
+import { SiteShell } from "@/components/project/site-shell";
 
-export default function PlansPage() {
-  return (
-    <>
-      <Navbar />
+const plans=[{name:"Essencial",speed:"300",price:"99,90",desc:"Para o dia a dia",benefits:["Wi-Fi de alta qualidade","Instalação inclusa","Suporte Parque Net"]},{name:"Ultra",speed:"600",price:"119,90",desc:"Para quem quer mais",featured:true,benefits:["Wi-Fi de alta qualidade","Ideal para streaming e gaming","Instalação inclusa","Suporte prioritário"]},{name:"Giga",speed:"1",unit:"Gbps",price:"149,90",desc:"Performance máxima",benefits:["Até 1 Gbps","Vários dispositivos","Instalação inclusa","Suporte prioritário"]}];
 
-      <main>
-        <PlansHero />
-        <PlansGrid />
-        <PlansBenefits />
-        <PlansCta />
-      </main>
-    </>
-  );
-}
+export default function PlansPage(){return <SiteShell><section className="pp-page-hero"><div className="pp-page-hero-inner"><span className="pp-eyebrow"><i/> PLANOS PARQUE NET</span><h1>Escolha a velocidade que <em>combina com você.</em></h1><p>Planos simples, transparentes e preparados para a rotina digital da sua casa.</p></div></section><section className="pp-section pp-section-muted"><div className="pp-container"><Reveal className="pp-section-head"><div><span className="pp-eyebrow"><i/> COMPARE</span><h2>Sem complicação.<br/>Só conexão.</h2></div><p>Veja o que cada experiência entrega e consulte a disponibilidade no seu endereço.</p></Reveal><div className="pp-plans">{plans.map(p=><Reveal key={p.name}><article className={`pp-plan ${p.featured?"featured":""}`}>{p.featured&&<span className="pp-plan-badge">MAIS ESCOLHIDO</span>}<h3>{p.name.toUpperCase()}</h3><div className="speed">{p.speed}<span>{p.unit??"Mbps"}</span></div><p>{p.desc}</p><div className="price">por <strong>R$ {p.price}</strong>/mês</div><div style={{borderTop:"1px solid rgba(255,255,255,.1)",marginTop:22,paddingTop:18}}>{p.benefits.map(b=><div key={b} style={{display:"flex",gap:8,alignItems:"center",fontSize:12,color:"#c8d2df",margin:"10px 0"}}><Check size={15} color="#ff7900"/>{b}</div>)}</div><Link className="pp-btn pp-btn-primary" href="/cobertura">Consultar cobertura <ArrowRight size={16}/></Link></article></Reveal>)}</div></div></section><section className="pp-section"><div className="pp-container"><Reveal className="pp-section-head"><div><span className="pp-eyebrow"><i/> EM TODOS OS PLANOS</span><h2>Conexão com<br/>estrutura de verdade.</h2></div></Reveal><div className="pp-grid-3">{["Fibra óptica até sua casa","Instalação profissional","Atendimento Parque Net"].map(t=><article className="pp-card" key={t}><div className="pp-card-icon"><Wifi size={22}/></div><h3>{t}</h3><p>Uma experiência consistente do primeiro contato ao uso diário.</p></article>)}</div></div></section></SiteShell>}
