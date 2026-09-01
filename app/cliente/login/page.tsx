@@ -15,7 +15,9 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState("");
-  const [recoverySent, setRecoverySent] = useState(false);
+  const [recoveryPending, setRecoveryPending] = useState(false);
+  const [recoveryError, setRecoveryError] = useState("");
+  const [recoveryMessage, setRecoveryMessage] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,14 +54,42 @@ export default function LoginPage() {
 
   function openRecovery() {
     setRecoveryOpen(true);
-    setRecoverySent(false);
     setRecoveryEmail(email);
+    setRecoveryError("");
+    setRecoveryMessage("");
   }
 
-  function submitRecovery(event: FormEvent<HTMLFormElement>) {
+  async function submitRecovery(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!recoveryEmail.trim()) return;
-    setRecoverySent(true);
+    setRecoveryError("");
+    setRecoveryMessage("");
+
+    if (!recoveryEmail.trim()) {
+      setRecoveryError("Informe o e-mail da sua conta.");
+      return;
+    }
+
+    setRecoveryPending(true);
+
+    try {
+      const response = await fetch("/api/auth/recovery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: recoveryEmail }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setRecoveryError(data.message ?? "Não foi possível processar a recuperação.");
+        return;
+      }
+
+      setRecoveryMessage(data.message ?? "Se o e-mail estiver cadastrado, você receberá as instruções de recuperação.");
+    } catch {
+      setRecoveryError("Não foi possível conectar ao serviço de recuperação.");
+    } finally {
+      setRecoveryPending(false);
+    }
   }
 
   return (
@@ -141,10 +171,10 @@ export default function LoginPage() {
 
           {recoveryOpen && (
             <div className="pp-auth-recovery">
-              {recoverySent ? (
+              {recoveryMessage ? (
                 <>
-                  <strong><CheckCircle2 size={15} /> Solicitação registrada</strong>
-                  <span>Se o e-mail estiver cadastrado, você receberá as instruções de recuperação.</span>
+                  <strong><CheckCircle2 size={15} /> Solicitação recebida</strong>
+                  <span>{recoveryMessage}</span>
                 </>
               ) : (
                 <form onSubmit={submitRecovery}>
@@ -157,10 +187,12 @@ export default function LoginPage() {
                       placeholder="voce@email.com"
                       value={recoveryEmail}
                       onChange={(event) => setRecoveryEmail(event.target.value)}
+                      autoComplete="email"
                       required
                     />
-                    <button type="submit">Continuar</button>
+                    <button type="submit" disabled={recoveryPending}>{recoveryPending ? "Enviando..." : "Continuar"}</button>
                   </div>
+                  {recoveryError && <span className="pp-auth-error" role="alert">{recoveryError}</span>}
                 </form>
               )}
             </div>
