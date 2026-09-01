@@ -30,7 +30,6 @@ export default function ClientPage() {
               <div><UserRound size={18} /><span><strong>Conta personalizada</strong><small>Informações do seu contrato</small></span></div>
             </div>
           </div>
-
           <div className={styles.card}>
             <div className={styles.cardBrand}><div><LockKeyhole size={19} /></div><span>CENTRAL DO CLIENTE</span></div>
             <div className={styles.heading}><span>BEM-VINDO DE VOLTA</span><h2>Acesse sua conta.</h2><p>Entre com seus dados para continuar.</p></div>
@@ -46,7 +45,7 @@ export default function ClientPage() {
             <div className={styles.security}><ShieldCheck size={15} /> Conexão protegida e dados tratados com segurança.</div>
           </div>
         </section>
-        <a className={styles.whatsapp} href="https://wa.me/5511999999999"><MessageCircle size={18} /> <span>Precisa de ajuda?</span></a>
+        <Link className={styles.whatsapp} href="/suporte?assunto=whatsapp"><MessageCircle size={18} /> <span>Precisa de ajuda?</span></Link>
       </main>
     </>
   );
