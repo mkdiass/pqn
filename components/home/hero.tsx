@@ -4,16 +4,11 @@ import { ArrowRight, Headphones, Gauge, Wifi } from "lucide-react";
 export function Hero() {
   return (
     <section className="hero">
-
       <div className="hero-background" />
 
       <div className="hero-content">
-
         <div className="hero-text">
-
-          <span className="hero-label">
-            PARQUE NET TELECOM
-          </span>
+          <span className="hero-label">PARQUE NET TELECOM</span>
 
           <h1>
             Sua conexão.
@@ -27,9 +22,8 @@ export function Hero() {
           </p>
 
           <div className="hero-buttons">
-
-            <Link href="/planos" className="primary-button">
-              Conhecer planos
+            <Link href="#contratar" className="primary-button">
+              Encontrar meu plano
               <ArrowRight size={20} />
             </Link>
 
@@ -37,11 +31,9 @@ export function Hero() {
               Consultar cobertura
               <ArrowRight size={20} />
             </Link>
-
           </div>
 
           <div className="hero-features">
-
             <div>
               <Gauge />
               <span>
@@ -65,29 +57,16 @@ export function Hero() {
                 <small>próximo e humanizado</small>
               </span>
             </div>
-
           </div>
-
         </div>
 
         <div className="hero-video">
-
           <div className="video-placeholder">
-
-            <div className="play-button">
-              ▶
-            </div>
-
-            <span>
-              ASSISTA À APRESENTAÇÃO
-            </span>
-
+            <div className="play-button">▶</div>
+            <span>ASSISTA À APRESENTAÇÃO</span>
           </div>
-
         </div>
-
       </div>
-
     </section>
   );
 }
