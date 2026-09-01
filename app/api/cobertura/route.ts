@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAddressByCep } from "@/lib/cep";
-import { checkCoverage } from "@/lib/coverage";
+import { getCoverageDetails } from "@/lib/coverage";
 
 export async function GET(request: NextRequest) {
   const cep = request.nextUrl.searchParams.get("cep") ?? "";
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "CEP não encontrado ou inválido." }, { status: 400 });
   }
 
-  const coverage = checkCoverage(address);
+  const coverage = getCoverageDetails(address);
 
   return NextResponse.json({
     ok: true,
