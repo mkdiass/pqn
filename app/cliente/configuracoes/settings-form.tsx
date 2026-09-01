@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore, useState } from "react";
 import { Bell, Check, Mail, ShieldCheck } from "lucide-react";
 import styles from "../client-section.module.css";
 
@@ -11,33 +11,50 @@ type Preferences = {
 };
 
 const STORAGE_KEY = "pqn-client-preferences";
+const STORAGE_EVENT = "pqn-preferences-change";
 const defaultPreferences: Preferences = { billing: true, service: true, offers: false };
+const defaultSnapshot = JSON.stringify(defaultPreferences);
+
+function readSnapshot() {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) ?? defaultSnapshot;
+  } catch {
+    return defaultSnapshot;
+  }
+}
+
+function subscribe(callback: () => void) {
+  const handleStorage = () => callback();
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(STORAGE_EVENT, handleStorage);
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(STORAGE_EVENT, handleStorage);
+  };
+}
 
 export function SettingsForm({ email }: { email: string }) {
-  const [preferences, setPreferences] = useState<Preferences>(defaultPreferences);
+  const snapshot = useSyncExternalStore(subscribe, readSnapshot, () => defaultSnapshot);
   const [saved, setSaved] = useState(false);
+  let preferences = defaultPreferences;
 
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) setPreferences({ ...defaultPreferences, ...JSON.parse(stored) });
-    } catch {
-      // Keep defaults when browser storage is unavailable or malformed.
-    }
-  }, []);
+  try {
+    const parsed = JSON.parse(snapshot) as Partial<Preferences>;
+    preferences = { ...defaultPreferences, ...parsed };
+  } catch {
+    preferences = defaultPreferences;
+  }
 
   function updatePreference(key: keyof Preferences) {
-    setPreferences((current) => {
-      const next = { ...current, [key]: !current[key] };
-      try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // The preference still updates for the current session.
-      }
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1800);
-      return next;
-    });
+    const next = { ...preferences, [key]: !preferences[key] };
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      window.dispatchEvent(new Event(STORAGE_EVENT));
+    } catch {
+      // The preference remains unavailable for persistence when browser storage is blocked.
+    }
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 1800);
   }
 
   return (
