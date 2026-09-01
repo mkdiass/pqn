@@ -4,6 +4,7 @@ import "./product.css";
 import "./interaction.css";
 import "./hero-enhancements.css";
 import "./premium-pages.css";
+import "./plans-page.css";
 import "./system.css";
 import "./project.css";
 import "./auth.css";
@@ -13,11 +14,8 @@ export const metadata: Metadata = {
     default: "Parque Net Telecom | Internet Fibra Óptica",
     template: "%s | Parque Net Telecom",
   },
-  description:
-    "Internet fibra óptica rápida, estável e feita para acompanhar sua rotina.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
-  ),
+  description: "Internet fibra óptica rápida, estável e feita para acompanhar sua rotina.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   openGraph: {
     title: "Parque Net Telecom",
     description: "Conexão feita para durar.",
@@ -26,9 +24,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR">
       <body>{children}</body>
