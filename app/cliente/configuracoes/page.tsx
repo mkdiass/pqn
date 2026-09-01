@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowLeft, Bell, LockKeyhole, Mail, Settings2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, LockKeyhole, Settings2, ShieldCheck } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getClientSession } from "@/lib/auth";
+import { SettingsForm } from "./settings-form";
 import styles from "../client-section.module.css";
 
 export const metadata = { title: "Configurações | Central do Cliente | Parque Net" };
@@ -19,7 +20,7 @@ export default async function SettingsPage() {
       <div className={styles.container}>
         <div className={styles.eyebrow}>CENTRAL DO CLIENTE / CONFIGURAÇÕES</div>
         <h1>Configurações</h1>
-        <p className={styles.lead}>Gerencie as preferências e informações da sua conta Parque Net.</p>
+        <p className={styles.lead}>Controle preferências da sua conta e veja quais recursos já estão disponíveis na Central.</p>
 
         <section className={styles.profileCard}>
           <div className={styles.avatar}>{session.name.charAt(0).toUpperCase()}</div>
@@ -28,12 +29,23 @@ export default async function SettingsPage() {
         </section>
 
         <div className={styles.settingsGrid}>
-          <section className={styles.card}><div className={styles.icon}><Mail size={19}/></div><span>CONTATO</span><h2>Dados de contato</h2><p>Seu e-mail de acesso atual é <strong>{session.email}</strong>.</p><button type="button" disabled>Editar contato</button></section>
-          <section className={styles.card}><div className={styles.icon}><LockKeyhole size={19}/></div><span>SEGURANÇA</span><h2>Acesso e senha</h2><p>Altere sua senha e mantenha sua conta protegida.</p><Link href="/cliente/login">Gerenciar acesso</Link></section>
-          <section className={styles.card}><div className={styles.icon}><Bell size={19}/></div><span>NOTIFICAÇÕES</span><h2>Preferências</h2><p>Preferências de alertas estarão disponíveis quando as notificações forem integradas.</p><button type="button" disabled>Configurar alertas</button></section>
-          <section className={styles.card}><div className={styles.icon}><Settings2 size={19}/></div><span>CONTA</span><h2>Preferências gerais</h2><p>Personalizações adicionais da Central do Cliente serão disponibilizadas aqui.</p><button type="button" disabled>Em breve</button></section>
+          <SettingsForm email={session.email} />
+          <section className={styles.card}>
+            <div className={styles.icon}><LockKeyhole size={19}/></div>
+            <span>SEGURANÇA</span>
+            <h2>Acesso e senha</h2>
+            <p>Sua sessão atual é protegida por cookie HTTP-only. A troca de senha ficará disponível quando a autenticação estiver ligada ao cadastro real.</p>
+            <div className={styles.pendingAction}><ShieldCheck size={15} /> Sessão autenticada</div>
+          </section>
+          <section className={styles.card}>
+            <div className={styles.icon}><Settings2 size={19}/></div>
+            <span>PRÓXIMA ETAPA</span>
+            <h2>Integração da conta</h2>
+            <p>O próximo nível é conectar preferências, cadastro e segurança ao ERP/IXC, permitindo alterações persistentes em qualquer dispositivo.</p>
+            <Link href="/cliente/financeiro">Ver área financeira <ArrowLeft size={14} className={styles.forwardIcon}/></Link>
+          </section>
         </div>
-        <div className={styles.demo}>ALGUMAS OPÇÕES ESTÃO BLOQUEADAS ATÉ A INTEGRAÇÃO COM O BACKEND</div>
+        <div className={styles.demo}>PREFERÊNCIAS LOCAIS FUNCIONAIS · DADOS DE CONTA E AUTENTICAÇÃO AINDA EM MODO DEMONSTRATIVO</div>
       </div>
     </main>
   );
