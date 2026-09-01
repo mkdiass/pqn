@@ -13,7 +13,7 @@ type Preferences = {
 const STORAGE_KEY = "pqn-client-preferences";
 const defaultPreferences: Preferences = { billing: true, service: true, offers: false };
 
-export function SettingsForm() {
+export function SettingsForm({ email }: { email: string }) {
   const [preferences, setPreferences] = useState<Preferences>(defaultPreferences);
   const [saved, setSaved] = useState(false);
 
@@ -60,7 +60,7 @@ export function SettingsForm() {
         <span>CONTATO</span>
         <h2>Seu e-mail de acesso</h2>
         <p>Este endereço é usado para identificar sua conta na Central. A alteração de dados pessoais será liberada quando o cadastro estiver conectado ao sistema de gestão.</p>
-        <div className={styles.contactValue}>{"cliente@parquenet.com.br"}</div>
+        <div className={styles.contactValue}>{email}</div>
         <div className={styles.pendingAction}><ShieldCheck size={15} /> Alteração protegida pelo backend</div>
       </section>
     </>
