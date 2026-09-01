@@ -4,8 +4,10 @@ import "./site.css";
 import "./marketing.css";
 import "./marketing-fixes.css";
 import "./immersive.css";
+import "./next-level.css";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
+import { ExperienceDock } from "@/components/layout/experience-dock";
 
 export const metadata: Metadata = {
   title: { default: "Parque Net Telecom", template: "%s | Parque Net Telecom" },
@@ -15,7 +17,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" data-scroll-behavior="smooth">
-      <body>{children}<WhatsAppFloat /><Footer /></body>
+      <body>
+        {children}
+        <ExperienceDock />
+        <WhatsAppFloat />
+        <Footer />
+      </body>
     </html>
   );
 }
