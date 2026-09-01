@@ -66,7 +66,7 @@ export function Footer() {
             </div>
           </div>
         </div>
-        <div className="pn-footer-bottom"><div className="pn-footer-bottom-inner"><span>© 2026 Parque Net — Todos os direitos reservados.</span><span>Internet 100% Fibra Óptica · Developed by MgDigital</span></div></div>
+        <div className="pn-footer-bottom"><div className="pn-footer-bottom-inner"><span>© 2026 Parque Net — Todos os direitos reservados.</span><span>Internet 100% Fibra Óptica · Developed by MKtec</span></div></div>
       </footer>
     </>
   );
