@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./network.css";
+import "./client.css";
 
 export const metadata: Metadata = {
   title: "Parque Net Telecom",
