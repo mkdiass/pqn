@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Home, Loader2, MapPin, Search, Wifi, XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAddressByCep } from "@/lib/cep";
-import { checkCoverage } from "@/lib/coverage";
+import { checkCoverage, type CoverageResult } from "@/lib/coverage";
 import { plans } from "@/data/plans";
 
 type Address = Awaited<ReturnType<typeof getAddressByCep>>;
@@ -13,8 +13,13 @@ type Step = 1 | 2 | 3;
 const steps = [
   { id: 1, label: "CEP" },
   { id: 2, label: "Endereço" },
-  { id: 3, label: "Cobertura" },
+  { id: 3, label: "Resultado" },
 ] as const;
+
+function formatCep(value: string) {
+  const clean = value.replace(/\D/g, "").slice(0, 8);
+  return clean.length > 5 ? `${clean.slice(0, 5)}-${clean.slice(5)}` : clean;
+}
 
 export function CoverageFlow() {
   const router = useRouter();
@@ -26,12 +31,12 @@ export function CoverageFlow() {
   const [number, setNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [covered, setCovered] = useState<boolean | null>(null);
+  const [coverage, setCoverage] = useState<CoverageResult | null>(null);
 
   async function handleCep() {
     const cleanCep = cep.replace(/\D/g, "");
     setError("");
-    setCovered(null);
+    setCoverage(null);
     if (cleanCep.length !== 8) {
       setError("Informe um CEP válido com 8 números.");
       return;
@@ -59,8 +64,7 @@ export function CoverageFlow() {
       return;
     }
     setError("");
-    const result = checkCoverage(address);
-    setCovered(result);
+    setCoverage(checkCoverage(address));
     setStep(3);
   }
 
@@ -69,21 +73,27 @@ export function CoverageFlow() {
     setCep("");
     setAddress(null);
     setNumber("");
-    setCovered(null);
+    setCoverage(null);
     setError("");
   }
+
+  const matchText = coverage?.match === "street"
+    ? "Rua cadastrada na nossa área de atendimento."
+    : coverage?.match === "neighborhood"
+      ? "Bairro cadastrado na nossa área de atendimento."
+      : "Este endereço não está em uma área cadastrada no momento.";
 
   return (
     <div className="coverage-flow">
       <div className="coverage-flow-top">
         <div className="coverage-flow-copy">
           <span className="coverage-flow-kicker"><Wifi size={14} /> CONSULTA DE COBERTURA</span>
-          <h2>{step === 1 ? "Vamos começar pelo seu CEP." : step === 2 ? "Confirme seu endereço." : covered ? "Boas notícias: sua região está conectada." : "Ainda não chegamos aí."}</h2>
-          <p>{step === 1 ? "É rápido e você não precisa saber o nome do plano para consultar." : step === 2 ? "Encontramos este endereço. Informe apenas o número do imóvel." : covered ? "Sua localização está dentro da nossa área de atendimento." : "Você pode deixar seu interesse registrado com nossa equipe."}</p>
+          <h2>{step === 1 ? "Vamos começar pelo seu CEP." : step === 2 ? "Encontramos seu endereço." : coverage?.available ? "Seu endereço está em uma área atendida." : "Ainda não temos cobertura aqui."}</h2>
+          <p>{step === 1 ? "Digite o CEP e nós localizamos seu endereço automaticamente." : step === 2 ? "Confira os dados abaixo e informe o número do imóvel para concluir a consulta." : coverage?.available ? matchText : "Você pode consultar outro endereço ou falar com nossa equipe sobre expansão da rede."}</p>
         </div>
         {selectedPlan && (
           <div className="coverage-plan-context">
-            <span>VOCÊ ESTÁ VENDO</span>
+            <span>PLANO SELECIONADO</span>
             <strong>{selectedPlan.name}</strong>
             <small>{selectedPlan.speedMbps >= 1000 ? "1 Gbps" : `${selectedPlan.speedMbps} Mbps`}</small>
           </div>
@@ -105,10 +115,10 @@ export function CoverageFlow() {
           <div className="coverage-flow-step">
             <div className="coverage-input-icon"><MapPin size={21} /></div>
             <label htmlFor="coverage-cep">Qual é o CEP da instalação?</label>
-            <span className="coverage-help">Usaremos o CEP apenas para localizar seu endereço.</span>
+            <span className="coverage-help">A consulta usa o CEP para localizar rua, bairro, cidade e estado.</span>
             <div className="coverage-main-input-row">
-              <input id="coverage-cep" value={cep} onChange={(event) => setCep(event.target.value.replace(/\D/g, "").slice(0, 8))} onKeyDown={(event) => { if (event.key === "Enter") handleCep(); }} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" maxLength={8} autoFocus />
-              <button className="pp-btn pp-btn-primary" type="button" onClick={handleCep} disabled={loading}>{loading ? <Loader2 className="pp-spin" size={18} /> : <Search size={18} />} Consultar CEP</button>
+              <input id="coverage-cep" value={formatCep(cep)} onChange={(event) => setCep(event.target.value.replace(/\D/g, "").slice(0, 8))} onKeyDown={(event) => { if (event.key === "Enter") handleCep(); }} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" maxLength={9} autoFocus />
+              <button className="pp-btn pp-btn-primary" type="button" onClick={handleCep} disabled={loading}>{loading ? <Loader2 className="pp-spin" size={18} /> : <Search size={18} />} {loading ? "Consultando..." : "Consultar CEP"}</button>
             </div>
             <a className="coverage-cep-help" href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noreferrer">Não sabe seu CEP? Consulte pelos Correios.</a>
           </div>
@@ -118,25 +128,26 @@ export function CoverageFlow() {
           <div className="coverage-flow-step">
             <div className="coverage-address-confirm">
               <div className="coverage-address-icon"><Home size={21} /></div>
-              <div><span>ENDEREÇO ENCONTRADO</span><strong>{address.street}</strong><p>{address.neighborhood} · {address.city}/{address.state}</p></div>
+              <div><span>ENDEREÇO ENCONTRADO</span><strong>{address.street || "Endereço não informado"}</strong><p>{address.neighborhood || "Bairro não informado"} · {address.city}/{address.state}</p></div>
             </div>
             <div className="coverage-number-field">
               <label htmlFor="coverage-number">Número do imóvel</label>
               <input id="coverage-number" value={number} onChange={(event) => setNumber(event.target.value.replace(/\D/g, "").slice(0, 6))} onKeyDown={(event) => { if (event.key === "Enter") handleCoverage(); }} inputMode="numeric" autoComplete="address-line2" placeholder="Ex.: 143" autoFocus />
+              <span>Precisamos do número para identificar o ponto de instalação.</span>
             </div>
-            <div className="coverage-flow-actions"><button className="pp-btn pp-btn-ghost" type="button" onClick={() => { setAddress(null); setStep(1); }}><ArrowLeft size={17} /> Alterar CEP</button><button className="pp-btn pp-btn-primary" type="button" onClick={handleCoverage}>Verificar cobertura <ArrowRight size={17} /></button></div>
+            <div className="coverage-flow-actions"><button className="pp-btn pp-btn-ghost" type="button" onClick={() => { setAddress(null); setNumber(""); setError(""); setStep(1); }}><ArrowLeft size={17} /> Alterar CEP</button><button className="pp-btn pp-btn-primary" type="button" onClick={handleCoverage}>Verificar cobertura <ArrowRight size={17} /></button></div>
           </div>
         )}
 
-        {step === 3 && covered !== null && (
-          <div className={`coverage-flow-step coverage-final ${covered ? "is-covered" : "is-uncovered"}`}>
-            <div className="coverage-final-icon">{covered ? <CheckCircle2 size={34} /> : <XCircle size={34} />}</div>
-            <span className="coverage-final-label">{covered ? "COBERTURA DISPONÍVEL" : "COBERTURA INDISPONÍVEL"}</span>
-            <h3>{covered ? "Você pode contratar sua internet Parque Net." : "Ainda não temos fibra neste endereço."}</h3>
-            <p>{covered ? "Seu endereço está em nossa área de atendimento. O próximo passo é escolher o plano que combina com sua rotina." : "Não significa que você ficará de fora. Nossa equipe pode registrar seu interesse e orientar sobre a expansão da rede."}</p>
+        {step === 3 && coverage && (
+          <div className={`coverage-flow-step coverage-final ${coverage.available ? "is-covered" : "is-uncovered"}`}>
+            <div className="coverage-final-icon">{coverage.available ? <CheckCircle2 size={34} /> : <XCircle size={34} />}</div>
+            <span className="coverage-final-label">{coverage.available ? "COBERTURA INDICADA" : "COBERTURA INDISPONÍVEL"}</span>
+            <h3>{coverage.available ? "Seu endereço está dentro da área cadastrada." : "Ainda não temos fibra cadastrada neste endereço."}</h3>
+            <p>{coverage.available ? `${address?.street}, ${number} · ${address?.neighborhood} · ${address?.city}/${address?.state}. ${matchText} A confirmação final de viabilidade pode depender da análise técnica da instalação.` : "Isso não impede você de demonstrar interesse. Nossa equipe pode orientar sobre disponibilidade futura e expansão da rede."}</p>
             <div className="coverage-flow-actions">
               <button className="pp-btn pp-btn-ghost" type="button" onClick={reset}>Consultar outro endereço</button>
-              {covered ? <button className="pp-btn pp-btn-primary" type="button" onClick={() => router.push(selectedPlan ? `/planos?selecionado=${selectedPlan.id}` : "/planos")}>{selectedPlan ? "Continuar com este plano" : "Escolher meu plano"} <ArrowRight size={17} /></button> : <a className="pp-btn pp-btn-primary" href="https://wa.me/5511987654321" target="_blank" rel="noreferrer">Falar com atendimento <ArrowRight size={17} /></a>}
+              {coverage.available ? <button className="pp-btn pp-btn-primary" type="button" onClick={() => router.push(selectedPlan ? `/planos?selecionado=${selectedPlan.id}` : "/planos")}>{selectedPlan ? "Continuar com este plano" : "Escolher meu plano"} <ArrowRight size={17} /></button> : <a className="pp-btn pp-btn-primary" href="https://wa.me/5511987654321" target="_blank" rel="noreferrer">Falar com atendimento <ArrowRight size={17} /></a>}
             </div>
           </div>
         )}
