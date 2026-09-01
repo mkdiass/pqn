@@ -1,8 +1,89 @@
 import Link from "next/link";
-import { ArrowRight, Check, Wifi } from "lucide-react";
+import { ArrowRight, Check, Gauge, Headphones, ShieldCheck, Sparkles, Wifi, Zap } from "lucide-react";
 import { Reveal } from "@/components/project/reveal";
 import { SiteShell } from "@/components/project/site-shell";
+import { plans } from "@/data/plans";
 
-const plans=[{name:"Essencial",speed:"300",price:"99,90",desc:"Para o dia a dia",benefits:["Wi-Fi de alta qualidade","Instalação inclusa","Suporte Parque Net"]},{name:"Ultra",speed:"600",price:"119,90",desc:"Para quem quer mais",featured:true,benefits:["Wi-Fi de alta qualidade","Ideal para streaming e gaming","Instalação inclusa","Suporte prioritário"]},{name:"Giga",speed:"1",unit:"Gbps",price:"149,90",desc:"Performance máxima",benefits:["Até 1 Gbps","Vários dispositivos","Instalação inclusa","Suporte prioritário"]}];
+const highlights = [
+  { icon: Wifi, title: "Fibra até sua casa", text: "Conexão de alta capacidade com infraestrutura preparada para o dia a dia." },
+  { icon: ShieldCheck, title: "Instalação especializada", text: "Equipe preparada para entregar uma instalação segura e bem executada." },
+  { icon: Headphones, title: "Atendimento próximo", text: "Suporte para acompanhar você antes, durante e depois da contratação." },
+];
 
-export default function PlansPage(){return <SiteShell><section className="pp-page-hero"><div className="pp-page-hero-inner"><span className="pp-eyebrow"><i/> PLANOS PARQUE NET</span><h1>Escolha a velocidade que <em>combina com você.</em></h1><p>Planos simples, transparentes e preparados para a rotina digital da sua casa.</p></div></section><section className="pp-section pp-section-muted"><div className="pp-container"><Reveal className="pp-section-head"><div><span className="pp-eyebrow"><i/> COMPARE</span><h2>Sem complicação.<br/>Só conexão.</h2></div><p>Veja o que cada experiência entrega e consulte a disponibilidade no seu endereço.</p></Reveal><div className="pp-plans">{plans.map(p=><Reveal key={p.name}><article className={`pp-plan ${p.featured?"featured":""}`}>{p.featured&&<span className="pp-plan-badge">MAIS ESCOLHIDO</span>}<h3>{p.name.toUpperCase()}</h3><div className="speed">{p.speed}<span>{p.unit??"Mbps"}</span></div><p>{p.desc}</p><div className="price">por <strong>R$ {p.price}</strong>/mês</div><div style={{borderTop:"1px solid rgba(255,255,255,.1)",marginTop:22,paddingTop:18}}>{p.benefits.map(b=><div key={b} style={{display:"flex",gap:8,alignItems:"center",fontSize:12,color:"#c8d2df",margin:"10px 0"}}><Check size={15} color="#ff7900"/>{b}</div>)}</div><Link className="pp-btn pp-btn-primary" href="/cobertura">Consultar cobertura <ArrowRight size={16}/></Link></article></Reveal>)}</div></div></section><section className="pp-section"><div className="pp-container"><Reveal className="pp-section-head"><div><span className="pp-eyebrow"><i/> EM TODOS OS PLANOS</span><h2>Conexão com<br/>estrutura de verdade.</h2></div></Reveal><div className="pp-grid-3">{["Fibra óptica até sua casa","Instalação profissional","Atendimento Parque Net"].map(t=><article className="pp-card" key={t}><div className="pp-card-icon"><Wifi size={22}/></div><h3>{t}</h3><p>Uma experiência consistente do primeiro contato ao uso diário.</p></article>)}</div></div></section></SiteShell>}
+const formatPrice = (price: number) => price.toFixed(2).replace(".", ",");
+
+export const metadata = {
+  title: "Planos | Parque Net",
+  description: "Compare os planos de internet fibra da Parque Net e encontre a velocidade ideal para sua rotina.",
+};
+
+export default function PlansPage() {
+  return (
+    <SiteShell>
+      <section className="plans-hero">
+        <div className="plans-hero-glow" aria-hidden="true" />
+        <div className="plans-hero-inner">
+          <Reveal>
+            <span className="pp-eyebrow"><i /> PLANOS PARQUE NET</span>
+            <h1>Mais velocidade.<br /><em>Mais liberdade.</em></h1>
+            <p>Escolha uma conexão feita para acompanhar sua casa, seu trabalho, seu entretenimento e tudo que acontece ao mesmo tempo.</p>
+            <div className="plans-hero-actions">
+              <Link href="/cobertura" className="pp-btn pp-btn-primary">Ver disponibilidade <ArrowRight size={16} /></Link>
+              <a href="#comparar" className="plans-text-link">Comparar planos <ArrowRight size={15} /></a>
+            </div>
+          </Reveal>
+          <Reveal className="plans-hero-panel">
+            <div className="plans-orbit" aria-hidden="true"><span /><span /><span /></div>
+            <div className="plans-hero-speed"><strong>1</strong><span>Gbps</span></div>
+            <div className="plans-hero-panel-copy"><span>ATÉ</span><strong>1.000 Mbps</strong><small>de velocidade em fibra óptica</small></div>
+            <div className="plans-live"><i /> Rede preparada</div>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="pp-section pp-section-muted" id="comparar">
+        <div className="pp-container">
+          <Reveal className="pp-section-head">
+            <div><span className="pp-eyebrow"><i /> COMPARE</span><h2>Encontre seu<br />ritmo de conexão.</h2></div>
+            <p>Do uso essencial ao alto desempenho, cada plano foi pensado para uma rotina diferente. Consulte a cobertura antes de contratar.</p>
+          </Reveal>
+
+          <div className="plans-grid">
+            {plans.map((plan) => (
+              <Reveal key={plan.id}>
+                <article className={`plan-card ${plan.featured ? "featured" : ""}`}>
+                  {plan.featured && <span className="plan-badge"><Sparkles size={12} /> MAIS ESCOLHIDO</span>}
+                  <div className="plan-card-top"><span>{plan.name.toUpperCase()}</span><div className="plan-card-icon"><Zap size={16} /></div></div>
+                  <div className="plan-speed"><strong>{plan.speedMbps >= 1000 ? "1" : plan.speedMbps}</strong><span>{plan.speedMbps >= 1000 ? "Gbps" : "Mbps"}</span></div>
+                  <p>{plan.description}</p>
+                  <div className="plan-price"><small>R$</small><strong>{formatPrice(plan.price)}</strong><span>/mês</span></div>
+                  <div className="plan-benefits">
+                    {plan.benefits.map((benefit) => <div key={benefit}><Check size={15} /> <span>{benefit}</span></div>)}
+                  </div>
+                  <Link href={`/cobertura?plano=${plan.id}`} className="plan-cta">Ver disponibilidade <ArrowRight size={15} /></Link>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="pp-section">
+        <div className="pp-container">
+          <Reveal className="pp-section-head">
+            <div><span className="pp-eyebrow"><i /> EM TODOS OS PLANOS</span><h2>Uma experiência que<br />vai além da velocidade.</h2></div>
+          </Reveal>
+          <div className="plans-highlights">
+            {highlights.map(({ icon: Icon, title, text }) => (
+              <article className="plan-highlight" key={title}><div className="plan-highlight-icon"><Icon size={21} /></div><h3>{title}</h3><p>{text}</p></article>
+            ))}
+          </div>
+          <Reveal className="plans-bottom-cta">
+            <div><span className="pp-eyebrow"><i /> PRONTO PARA CONECTAR?</span><h2>Descubra qual plano está disponível no seu endereço.</h2></div>
+            <Link href="/cobertura" className="pp-btn pp-btn-primary">Consultar cobertura <ArrowRight size={16} /></Link>
+          </Reveal>
+        </div>
+      </section>
+    </SiteShell>
+  );
+}
