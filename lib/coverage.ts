@@ -7,6 +7,11 @@ type CheckCoverageParams = {
   state: string;
 };
 
+export type CoverageResult = {
+  available: boolean;
+  match: "street" | "neighborhood" | "none";
+};
+
 function normalize(value: string) {
   return value
     .normalize("NFD")
@@ -40,28 +45,25 @@ export function checkCoverage({
   neighborhood,
   city,
   state,
-}: CheckCoverageParams) {
+}: CheckCoverageParams): CoverageResult {
   const normalizedCity = normalize(city);
   const normalizedState = normalize(state);
 
   const location = coverageLocations.find((item) => {
-    const cityMatches = normalize(item.city) === normalizedCity;
-    const stateMatches = normalize(item.state) === normalizedState;
-
-    if (!cityMatches || !stateMatches) {
-      return false;
-    }
-
-    const streetMatches = matchesLocation(street, item.streets);
-    const neighborhoodMatches = matchesLocation(
-      neighborhood,
-      item.neighborhoods
-    );
-
-    // A cobertura é válida quando a cidade/UF conferem e
-    // o endereço pertence a uma rua ou bairro cadastrado.
-    return streetMatches || neighborhoodMatches;
+    return normalize(item.city) === normalizedCity && normalize(item.state) === normalizedState;
   });
 
-  return Boolean(location);
+  if (!location) {
+    return { available: false, match: "none" };
+  }
+
+  if (matchesLocation(street, location.streets)) {
+    return { available: true, match: "street" };
+  }
+
+  if (matchesLocation(neighborhood, location.neighborhoods)) {
+    return { available: true, match: "neighborhood" };
+  }
+
+  return { available: false, match: "none" };
 }
