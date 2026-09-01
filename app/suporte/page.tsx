@@ -42,7 +42,7 @@ export default function SupportPage() {
             <h1>Quando você precisar,<br /><strong>a gente resolve.</strong></h1>
             <p>Encontre uma solução rapidamente ou fale diretamente com quem pode ajudar.</p>
             <div className={styles.heroActions}>
-              <a href="https://wa.me/5511999999999" className={styles.primary}><MessageCircle size={18} /> Falar no WhatsApp</a>
+              <Link href="/suporte?assunto=whatsapp" className={styles.primary}><MessageCircle size={18} /> Falar no WhatsApp</Link>
               <a href="#faq" className={styles.secondary}><Search size={18} /> Ver perguntas frequentes</a>
             </div>
           </div>
@@ -69,7 +69,7 @@ export default function SupportPage() {
           <div className={styles.solution}>
             <div className={styles.solutionIcon}><Icon size={28} /></div>
             <div><span>CAMINHO RECOMENDADO</span><h3>{current.title}</h3><p>{current.text}</p></div>
-            <a href={selected === "whatsapp" ? "https://wa.me/5511999999999" : `#${selected}`}>Continuar <ArrowRight size={17} /></a>
+            <Link href={`/suporte?assunto=${selected}`}>Continuar <ArrowRight size={17} /></Link>
           </div>
         </section>
 
