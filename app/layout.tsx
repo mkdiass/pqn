@@ -5,8 +5,6 @@ import "./interaction.css";
 import "./hero-enhancements.css";
 import "./premium-pages.css";
 import "./plans-page.css";
-import "./coverage-checker.css";
-import "./system.css";
 import "./project.css";
 import "./auth.css";
 
