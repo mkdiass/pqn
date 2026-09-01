@@ -5,6 +5,7 @@ import { Hero } from "@/components/home/hero";
 import { Benefits } from "@/components/home/benefits";
 import { Plans } from "@/components/home/plans";
 import { Company } from "@/components/home/company";
+import { SmartJourney } from "@/components/home/smart-journey";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
+        <SmartJourney />
         <Benefits />
         <Plans />
         <Company />
