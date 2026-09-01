@@ -1,19 +1,9 @@
 import Link from "next/link";
+import { ArrowRight, Building2, Cloud, ShieldCheck, Zap } from "lucide-react";
+import { Reveal } from "@/components/project/reveal";
+import { SiteShell } from "@/components/project/site-shell";
 
 export default function EmpresasPage() {
-  return (
-    <main style={{ minHeight: "100vh", padding: "120px 24px", maxWidth: 1200, margin: "0 auto" }}>
-      <span style={{ fontWeight: 700, letterSpacing: ".12em" }}>PARQUE NET EMPRESAS</span>
-      <h1 style={{ fontSize: "clamp(42px, 7vw, 82px)", margin: "18px 0" }}>
-        Internet que acompanha o ritmo do seu <em>negócio.</em>
-      </h1>
-      <p style={{ maxWidth: 680, fontSize: 20, lineHeight: 1.7 }}>
-        Conectividade profissional, estabilidade e atendimento próximo para empresas que não podem parar.
-      </p>
-      <div style={{ display: "flex", gap: 16, marginTop: 32, flexWrap: "wrap" }}>
-        <Link href="/suporte">Falar com especialista →</Link>
-        <Link href="/cobertura">Consultar cobertura</Link>
-      </div>
-    </main>
-  );
+  const items = [[Zap, "Link de alta performance", "Conectividade preparada para operações críticas e equipes distribuídas."], [ShieldCheck, "Estabilidade e segurança", "Uma infraestrutura pensada para reduzir indisponibilidade e proteger sua operação."], [Cloud, "Conexão para a nuvem", "Apoie sistemas, videoconferência, backups e aplicações online com mais previsibilidade."]];
+  return <SiteShell><section className="pp-page-hero"><div className="pp-page-hero-inner"><span className="pp-eyebrow"><i /> PARQUE NET EMPRESAS</span><h1>Internet que acompanha o ritmo do seu <em>negócio.</em></h1><p>Conectividade profissional, atendimento próximo e soluções para empresas que não podem parar.</p><div className="pp-actions"><Link className="pp-btn pp-btn-primary" href="/suporte?tipo=empresas">Falar com especialista <ArrowRight size={17}/></Link><Link className="pp-btn pp-btn-ghost" href="/cobertura">Consultar cobertura</Link></div></div></section><section className="pp-section"><div className="pp-container"><Reveal className="pp-section-head"><div><span className="pp-eyebrow"><i /> INFRAESTRUTURA</span><h2>Uma conexão profissional<br/>para uma operação profissional.</h2></div><p>Do pequeno escritório à operação que depende de conectividade o dia inteiro.</p></Reveal><div className="pp-grid-3">{items.map(([Icon,title,text])=>{const I=Icon as typeof Zap;return <Reveal key={title as string}><article className="pp-card"><div className="pp-card-icon"><I size={22}/></div><h3>{title as string}</h3><p>{text as string}</p></article></Reveal>})}</div></div></section><section className="pp-stat-band"><div className="pp-container pp-stats"><div className="pp-stat"><strong>24/7</strong><span>MONITORAMENTO</span></div><div className="pp-stat"><strong>1 Gbps</strong><span>ATÉ DE VELOCIDADE</span></div><div className="pp-stat"><strong>Baixa</strong><span>LATÊNCIA</span></div><div className="pp-stat"><strong>Humano</strong><span>ATENDIMENTO</span></div></div></section><section className="pp-cta"><div className="pp-cta-inner"><div><span className="pp-eyebrow"><i /> SOLUÇÃO SOB MEDIDA</span><h2>Vamos conectar sua empresa?</h2><p>Conte o que sua operação precisa e nossa equipe orienta o melhor caminho.</p></div><Link className="pp-btn pp-btn-primary" href="/suporte?tipo=empresas">Falar com especialista <Building2 size={17}/></Link></div></section></SiteShell>;
 }
