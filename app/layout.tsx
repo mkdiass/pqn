@@ -5,6 +5,7 @@ import "./marketing.css";
 import "./marketing-fixes.css";
 import "./immersive.css";
 import { Footer } from "@/components/layout/footer";
+import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
 
 export const metadata: Metadata = {
   title: { default: "Parque Net Telecom", template: "%s | Parque Net Telecom" },
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" data-scroll-behavior="smooth">
-      <body>{children}<Footer /></body>
+      <body>{children}<WhatsAppFloat /><Footer /></body>
     </html>
   );
 }
