@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Check, Gauge, Headphones, ShieldCheck, Sparkles, Wifi, Zap } from "lucide-react";
+import { ArrowRight, Check, Headphones, ShieldCheck, Sparkles, Wifi, Zap } from "lucide-react";
 import { Reveal } from "@/components/project/reveal";
 import { SiteShell } from "@/components/project/site-shell";
 import { plans } from "@/data/plans";
@@ -12,12 +12,18 @@ const highlights = [
 
 const formatPrice = (price: number) => price.toFixed(2).replace(".", ",");
 
+type PlansPageProps = { searchParams: Promise<{ selecionado?: string }> };
+
 export const metadata = {
   title: "Planos | Parque Net",
   description: "Compare os planos de internet fibra da Parque Net e encontre a velocidade ideal para sua rotina.",
 };
 
-export default function PlansPage() {
+export default async function PlansPage({ searchParams }: PlansPageProps) {
+  const params = await searchParams;
+  const selectedPlanId = params.selecionado;
+  const selectedPlan = plans.find((plan) => plan.id === selectedPlanId);
+
   return (
     <SiteShell>
       <section className="plans-hero">
@@ -48,11 +54,19 @@ export default function PlansPage() {
             <p>Do uso essencial ao alto desempenho, cada plano foi pensado para uma rotina diferente. Consulte a cobertura antes de contratar.</p>
           </Reveal>
 
+          {selectedPlan && (
+            <Reveal className="plans-selection-note">
+              <div><span>SELEÇÃO EM ANDAMENTO</span><strong>{selectedPlan.name} · {selectedPlan.speedMbps >= 1000 ? "1 Gbps" : `${selectedPlan.speedMbps} Mbps`}</strong><p>Você voltou da consulta de cobertura. Continue para verificar este plano no seu endereço.</p></div>
+              <Link href={`/cobertura?plano=${selectedPlan.id}`} className="pp-btn pp-btn-primary">Continuar <ArrowRight size={16} /></Link>
+            </Reveal>
+          )}
+
           <div className="plans-grid">
             {plans.map((plan) => (
               <Reveal key={plan.id}>
-                <article className={`plan-card ${plan.featured ? "featured" : ""}`}>
+                <article className={`plan-card ${plan.featured ? "featured" : ""} ${selectedPlanId === plan.id ? "selected" : ""}`}>
                   {plan.featured && <span className="plan-badge"><Sparkles size={12} /> MAIS ESCOLHIDO</span>}
+                  {selectedPlanId === plan.id && <span className="plan-selected-badge">SELECIONADO</span>}
                   <div className="plan-card-top"><span>{plan.name.toUpperCase()}</span><div className="plan-card-icon"><Zap size={16} /></div></div>
                   <div className="plan-speed"><strong>{plan.speedMbps >= 1000 ? "1" : plan.speedMbps}</strong><span>{plan.speedMbps >= 1000 ? "Gbps" : "Mbps"}</span></div>
                   <p>{plan.description}</p>
