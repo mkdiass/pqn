@@ -1,20 +1,26 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 
 export function Company() {
   return (
     <section className="company">
-
       <div className="company-container">
-
-        <div className="company-video">
-          <div className="company-play">
-            ▶
+        <div className="company-video" aria-label="Vídeo institucional Parque Net">
+          <video
+            src="/videos/parque-net.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
+          <div className="company-video-overlay" />
+          <div className="company-play" aria-hidden="true">
+            <Play size={22} fill="currentColor" />
           </div>
         </div>
 
         <div className="company-content">
-
           <span>CONHEÇA A PARQUE NET</span>
 
           <h2>
@@ -35,15 +41,12 @@ export function Company() {
             óptica até você.
           </p>
 
-          <Link href="/empresa" className="company-button">
+          <Link href="/empresas" className="company-button">
             Conheça nossa história
             <ArrowRight size={20} />
           </Link>
-
         </div>
-
       </div>
-
     </section>
   );
 }
