@@ -3,6 +3,8 @@ import "./globals.css";
 import "./network.css";
 import "./client.css";
 
+import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
+
 export const metadata: Metadata = {
   title: "Parque Net Telecom",
   description:
@@ -16,7 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        {children}
+        <WhatsAppFloat />
+      </body>
     </html>
   );
 }
