@@ -8,6 +8,7 @@ import "./next-level.css";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
 import { ExperienceDock } from "@/components/layout/experience-dock";
+import { PageTransition } from "@/components/layout/page-transition";
 
 export const metadata: Metadata = {
   title: { default: "Parque Net Telecom", template: "%s | Parque Net Telecom" },
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="pt-BR" data-scroll-behavior="smooth">
       <body>
+        <PageTransition />
         {children}
         <ExperienceDock />
         <WhatsAppFloat />
