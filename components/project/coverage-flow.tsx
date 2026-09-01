@@ -3,12 +3,18 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Home, Loader2, MapPin, Search, Wifi, XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getAddressByCep } from "@/lib/cep";
-import { checkCoverage, type CoverageResult } from "@/lib/coverage";
 import { plans } from "@/data/plans";
+import type { CoverageResult } from "@/lib/coverage";
 
-type Address = Awaited<ReturnType<typeof getAddressByCep>>;
+type Address = {
+  cep: string;
+  street: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+};
 type Step = 1 | 2 | 3;
+type CoverageResponse = { ok: true; available: boolean; match: CoverageResult["match"]; address: Address; number: string | null; message: string; notice: string } | { ok: false; error: string };
 
 const steps = [
   { id: 1, label: "CEP" },
@@ -27,11 +33,11 @@ export function CoverageFlow() {
   const selectedPlan = useMemo(() => plans.find((plan) => plan.id === params.get("plano")), [params]);
   const [step, setStep] = useState<Step>(1);
   const [cep, setCep] = useState("");
-  const [address, setAddress] = useState<Exclude<Address, null> | null>(null);
+  const [address, setAddress] = useState<Address | null>(null);
   const [number, setNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [coverage, setCoverage] = useState<CoverageResult | null>(null);
+  const [coverage, setCoverage] = useState<CoverageResponse & { ok: true } | null>(null);
 
   async function handleCep() {
     const cleanCep = cep.replace(/\D/g, "");
@@ -43,12 +49,13 @@ export function CoverageFlow() {
     }
     setLoading(true);
     try {
-      const result = await getAddressByCep(cleanCep);
-      if (!result) {
-        setError("Não encontramos esse CEP. Confira os números e tente novamente.");
+      const response = await fetch(`/api/cobertura?cep=${cleanCep}`, { cache: "no-store" });
+      const result = (await response.json()) as CoverageResponse;
+      if (!response.ok || !result.ok) {
+        setError(result.ok ? "Não foi possível consultar este CEP." : result.error);
         return;
       }
-      setAddress(result);
+      setAddress(result.address);
       setStep(2);
     } catch {
       setError("Não foi possível consultar o CEP agora. Tente novamente em instantes.");
@@ -57,15 +64,28 @@ export function CoverageFlow() {
     }
   }
 
-  function handleCoverage() {
+  async function handleCoverage() {
     if (!address) return;
     if (!number.trim()) {
       setError("Informe o número do imóvel para continuar.");
       return;
     }
     setError("");
-    setCoverage(checkCoverage(address));
-    setStep(3);
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/cobertura?cep=${address.cep.replace(/\D/g, "")}&numero=${encodeURIComponent(number)}`, { cache: "no-store" });
+      const result = (await response.json()) as CoverageResponse;
+      if (!response.ok || !result.ok) {
+        setError(result.ok ? "Não foi possível concluir a consulta." : result.error);
+        return;
+      }
+      setCoverage(result);
+      setStep(3);
+    } catch {
+      setError("Não foi possível verificar a cobertura agora. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function reset() {
@@ -135,7 +155,7 @@ export function CoverageFlow() {
               <input id="coverage-number" value={number} onChange={(event) => setNumber(event.target.value.replace(/\D/g, "").slice(0, 6))} onKeyDown={(event) => { if (event.key === "Enter") handleCoverage(); }} inputMode="numeric" autoComplete="address-line2" placeholder="Ex.: 143" autoFocus />
               <span>Precisamos do número para identificar o ponto de instalação.</span>
             </div>
-            <div className="coverage-flow-actions"><button className="pp-btn pp-btn-ghost" type="button" onClick={() => { setAddress(null); setNumber(""); setError(""); setStep(1); }}><ArrowLeft size={17} /> Alterar CEP</button><button className="pp-btn pp-btn-primary" type="button" onClick={handleCoverage}>Verificar cobertura <ArrowRight size={17} /></button></div>
+            <div className="coverage-flow-actions"><button className="pp-btn pp-btn-ghost" type="button" onClick={() => { setAddress(null); setNumber(""); setError(""); setStep(1); }}><ArrowLeft size={17} /> Alterar CEP</button><button className="pp-btn pp-btn-primary" type="button" onClick={handleCoverage} disabled={loading}>{loading ? <Loader2 className="pp-spin" size={17} /> : <ArrowRight size={17} />} {loading ? "Verificando..." : "Verificar cobertura"}</button></div>
           </div>
         )}
 
@@ -149,6 +169,7 @@ export function CoverageFlow() {
               <button className="pp-btn pp-btn-ghost" type="button" onClick={reset}>Consultar outro endereço</button>
               {coverage.available ? <button className="pp-btn pp-btn-primary" type="button" onClick={() => router.push(selectedPlan ? `/planos?selecionado=${selectedPlan.id}` : "/planos")}>{selectedPlan ? "Continuar com este plano" : "Escolher meu plano"} <ArrowRight size={17} /></button> : <a className="pp-btn pp-btn-primary" href="https://wa.me/5511987654321" target="_blank" rel="noreferrer">Falar com atendimento <ArrowRight size={17} /></a>}
             </div>
+            <small className="coverage-final-notice">{coverage.notice}</small>
           </div>
         )}
       </div>
