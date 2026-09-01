@@ -3,6 +3,7 @@ import "./globals.css";
 import "./product.css";
 import "./interaction.css";
 import "./hero-enhancements.css";
+import "./premium-pages.css";
 
 export const metadata: Metadata = {
   title: {
