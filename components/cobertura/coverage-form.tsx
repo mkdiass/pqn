@@ -1,16 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Loader2, MapPin, Search } from "lucide-react";
+import {
+  ArrowRight,
+  Loader2,
+  MapPin,
+  Search,
+} from "lucide-react";
 
 import { getAddressByCep } from "@/lib/cep";
-import { checkCoverage } from "@/lib/coverage";
 import { CoverageResult } from "./coverage-result";
 
 export function CoverageForm() {
   const [cep, setCep] = useState("");
   const [loading, setLoading] = useState(false);
+  const [coverageLoading, setCoverageLoading] = useState(false);
   const [error, setError] = useState("");
+
   const [addressFound, setAddressFound] = useState(false);
   const [coverageChecked, setCoverageChecked] = useState(false);
   const [hasCoverage, setHasCoverage] = useState(false);
@@ -41,6 +47,9 @@ export function CoverageForm() {
     setCep(formattedCep);
     setAddressFound(false);
     setCoverageChecked(false);
+    setHasCoverage(false);
+    setNumber("");
+    setComplement("");
     setError("");
   }
 
@@ -56,6 +65,7 @@ export function CoverageForm() {
     setError("");
     setAddressFound(false);
     setCoverageChecked(false);
+    setHasCoverage(false);
 
     try {
       const result = await getAddressByCep(cleanCep);
@@ -84,7 +94,7 @@ export function CoverageForm() {
     }
   }
 
-  function handleCoverageSearch() {
+  async function handleCoverageSearch() {
     if (!addressFound) {
       setError("Primeiro consulte um CEP válido.");
       return;
@@ -96,16 +106,48 @@ export function CoverageForm() {
     }
 
     setError("");
+    setCoverageLoading(true);
+    setCoverageChecked(false);
 
-    const result = checkCoverage({
-      street: address.street,
-      neighborhood: address.neighborhood,
-      city: address.city,
-      state: address.state,
-    });
+    try {
+      const response = await fetch("/api/cobertura", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cep,
+          street: address.street,
+          number,
+          neighborhood: address.neighborhood,
+          city: address.city,
+          state: address.state,
+          complement,
+        }),
+      });
 
-    setHasCoverage(result);
-    setCoverageChecked(true);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          typeof data?.error === "string"
+            ? data.error
+            : "Não foi possível consultar a cobertura."
+        );
+      }
+
+      setHasCoverage(data.hasCoverage === true);
+      setCoverageChecked(true);
+    } catch (error) {
+      setCoverageChecked(false);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível consultar a cobertura. Tente novamente."
+      );
+    } finally {
+      setCoverageLoading(false);
+    }
   }
 
   return (
@@ -250,9 +292,19 @@ export function CoverageForm() {
                     type="button"
                     className="coverage-submit-button"
                     onClick={handleCoverageSearch}
+                    disabled={coverageLoading}
                   >
-                    Consultar cobertura
-                    <ArrowRight size={19} />
+                    {coverageLoading ? (
+                      <>
+                        <Loader2 size={19} className="coverage-loading" />
+                        Consultando...
+                      </>
+                    ) : (
+                      <>
+                        Consultar cobertura
+                        <ArrowRight size={19} />
+                      </>
+                    )}
                   </button>
                 </div>
               )}
@@ -269,9 +321,7 @@ export function CoverageForm() {
         </div>
       </section>
 
-      {coverageChecked && (
-        <CoverageResult hasCoverage={hasCoverage} />
-      )}
+      {coverageChecked && <CoverageResult hasCoverage={hasCoverage} />}
     </>
   );
 }

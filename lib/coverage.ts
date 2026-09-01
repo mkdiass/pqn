@@ -5,6 +5,7 @@ type CheckCoverageParams = {
   neighborhood: string;
   city: string;
   state: string;
+  number: string;
 };
 
 function normalize(value: string) {
@@ -40,7 +41,12 @@ export function checkCoverage({
   neighborhood,
   city,
   state,
+  number,
 }: CheckCoverageParams) {
+  if (!number.trim()) {
+    return false;
+  }
+
   const normalizedCity = normalize(city);
   const normalizedState = normalize(state);
 
@@ -58,8 +64,6 @@ export function checkCoverage({
       item.neighborhoods
     );
 
-    // A cobertura é válida quando a cidade/UF conferem e
-    // o endereço pertence a uma rua ou bairro cadastrado.
     return streetMatches || neighborhoodMatches;
   });
 
