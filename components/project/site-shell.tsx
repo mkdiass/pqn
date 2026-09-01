@@ -25,6 +25,13 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             <Link href="/suporte" className="pp-nav-icon" aria-label="Suporte"><Headphones size={17} /></Link>
             <Link href="/cobertura" className="pp-nav-coverage"><MapPin size={15} /> Cobertura</Link>
             <Link href="/cliente" className="pp-nav-client"><UserRound size={15} /> Central do cliente <ArrowRight size={14} /></Link>
+            <details className="pp-mobile-menu">
+              <summary aria-label="Abrir menu"><span /><span /><span /></summary>
+              <nav aria-label="Navegação mobile">
+                {links.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}
+                <Link href="/cliente">Central do cliente <ArrowRight size={14} /></Link>
+              </nav>
+            </details>
           </div>
         </div>
       </header>
