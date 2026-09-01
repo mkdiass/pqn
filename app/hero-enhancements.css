@@ -1,0 +1,26 @@
+.network-visual { position: relative; min-height: 470px; padding: 26px; overflow: hidden; border: 1px solid rgba(255,255,255,.12); border-radius: 28px; background: radial-gradient(circle at 50% 45%, rgba(255,121,0,.16), transparent 30%), linear-gradient(145deg, rgba(10,31,55,.96), rgba(2,11,24,.98)); box-shadow: 0 30px 90px rgba(0,0,0,.32); }
+.network-visual::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 42px 42px; mask-image: linear-gradient(to bottom, black, transparent); }
+.network-topline, .network-metrics, .network-action { position: relative; z-index: 2; }
+.network-topline { display: flex; justify-content: space-between; align-items: center; color: #dce6f2; font-size: 11px; font-weight: 800; letter-spacing: 2px; }
+.network-topline span { display: flex; align-items: center; gap: 8px; }
+.network-topline i { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 14px #4ade80; animation: netBlink 1.6s ease-in-out infinite; }
+.network-topline small { color: #4ade80; font-size: 9px; }
+.network-core { position: absolute; top: 50%; left: 50%; width: 270px; height: 270px; transform: translate(-50%, -54%); display: grid; place-items: center; }
+.network-core-icon { position: relative; z-index: 3; width: 82px; height: 82px; display: grid; place-items: center; border: 1px solid rgba(255,121,0,.5); border-radius: 50%; color: #ff7900; background: rgba(255,121,0,.1); box-shadow: 0 0 55px rgba(255,121,0,.18); }
+.network-orbit { position: absolute; inset: 12px; border: 1px solid rgba(255,121,0,.2); border-radius: 50%; animation: orbitSpin 10s linear infinite; }
+.orbit-two { inset: 42px; border-color: rgba(255,255,255,.12); animation-duration: 7s; animation-direction: reverse; }
+.network-pulse { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #ff7900; box-shadow: 0 0 22px rgba(255,121,0,.8); }
+.pulse-one { top: 28px; right: 44px; animation: pulseFloat 2.8s ease-in-out infinite; }
+.pulse-two { bottom: 42px; left: 34px; animation: pulseFloat 2.3s .5s ease-in-out infinite; }
+.network-metrics { position: absolute; left: 26px; right: 26px; bottom: 84px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.network-metrics > div { display: flex; align-items: center; gap: 9px; padding: 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; color: #ff7900; background: rgba(255,255,255,.045); backdrop-filter: blur(8px); }
+.network-metrics span { display: flex; flex-direction: column; gap: 2px; color: #8ea0b5; font-size: 9px; }
+.network-metrics strong { color: #fff; font-size: 11px; }
+.network-action { position: absolute; left: 26px; right: 26px; bottom: 24px; display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 0 15px; border: 1px solid rgba(255,121,0,.25); border-radius: 12px; color: #fff; background: rgba(255,121,0,.09); font-size: 12px; font-weight: 700; transition: transform .2s ease, background .2s ease; }
+.network-action span { display: flex; align-items: center; gap: 8px; }
+.network-action:hover { transform: translateY(-2px); background: rgba(255,121,0,.16); }
+@keyframes orbitSpin { to { transform: rotate(360deg); } }
+@keyframes pulseFloat { 50% { transform: translateY(-8px) scale(1.15); } }
+@keyframes netBlink { 50% { opacity: .35; } }
+@media (max-width: 700px) { .network-visual { min-height: 390px; } .network-core { width: 210px; height: 210px; } .network-metrics { bottom: 76px; } .network-metrics > div { padding: 9px; } .network-metrics span { font-size: 8px; } }
+@media (prefers-reduced-motion: reduce) { .network-orbit, .network-pulse, .network-topline i { animation: none; } }
