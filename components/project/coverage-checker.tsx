@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowRight, CheckCircle2, Loader2, MapPin, Search, XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAddressByCep } from "@/lib/cep";
@@ -19,10 +19,13 @@ export function CoverageChecker() {
   const [error, setError] = useState("");
   const [result, setResult] = useState<boolean | null>(null);
 
-  useEffect(() => {
+  function handleCepChange(value: string) {
+    setCep(value.replace(/\D/g, "").slice(0, 8));
+    setAddress(null);
+    setNumber("");
     setResult(null);
     setError("");
-  }, [cep]);
+  }
 
   async function search() {
     const clean = cep.replace(/\D/g, "");
@@ -78,7 +81,7 @@ export function CoverageChecker() {
       <div className="coverage-search">
         <label htmlFor="cep">CEP</label>
         <div className="coverage-search-row">
-          <input id="cep" value={cep} onChange={(event) => setCep(event.target.value.replace(/\D/g, "").slice(0, 8))} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" maxLength={8} />
+          <input id="cep" value={cep} onChange={(event) => handleCepChange(event.target.value)} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" maxLength={8} />
           <button className="pp-btn pp-btn-primary" type="button" onClick={search} disabled={loading}>{loading ? <Loader2 className="pp-spin" size={18} /> : <Search size={18} />} Buscar</button>
         </div>
       </div>
