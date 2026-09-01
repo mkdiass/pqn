@@ -59,12 +59,21 @@ export function CoverageForm({ initialCep = "", autoSearchToken = 0 }: CoverageF
     }
   }, []);
 
-  useEffect(() => {
-    if (!autoSearchToken || !initialCep) return;
-    const cleanCep = initialCep.replace(/\D/g, "");
-    setCep(formatCep(cleanCep));
+useEffect(() => {
+  if (!autoSearchToken || !initialCep) return;
+
+  const cleanCep = initialCep.replace(/\D/g, "");
+
+  if (cleanCep.length !== 8) return;
+
+  const timer = window.setTimeout(() => {
     void searchCep(cleanCep, true);
-  }, [autoSearchToken, initialCep, searchCep]);
+  }, 0);
+
+  return () => {
+    window.clearTimeout(timer);
+  };
+}, [autoSearchToken, initialCep, searchCep]);
 
   function handleCepChange(event: React.ChangeEvent<HTMLInputElement>) {
     setCep(formatCep(event.target.value));
