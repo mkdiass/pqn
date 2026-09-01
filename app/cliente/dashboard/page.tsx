@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity, ArrowRight, Bell, CreditCard, Gauge, Headphones, Home, LifeBuoy, LogOut, Settings, ShieldCheck, Wifi, Zap } from "lucide-react";
+import { Activity, ArrowRight, Bell, CreditCard, FileText, Gauge, Headphones, Home, LifeBuoy, LogOut, ReceiptText, Settings, ShieldCheck, Wifi, Zap } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getClientSession } from "@/lib/auth";
 import styles from "./dashboard.module.css";
@@ -22,9 +22,9 @@ export default async function ClientDashboard() {
         <div className={styles.accountLabel}>CENTRAL DO CLIENTE</div>
         <nav className={styles.nav} aria-label="Navegação da Central do Cliente">
           <Link href="/cliente/dashboard" className={styles.active}><Home size={17}/><span>Visão geral</span></Link>
-          <Link href="/planos"><Wifi size={17}/><span>Meu plano</span></Link>
+          <Link href="/cliente/contrato"><FileText size={17}/><span>Meu contrato</span></Link>
+          <Link href="/cliente/faturas"><ReceiptText size={17}/><span>Faturas</span></Link>
           <a href="#performance"><Gauge size={17}/><span>Performance</span></a>
-          <Link href="/cliente/financeiro"><CreditCard size={17}/><span>Financeiro</span></Link>
           <Link href="/suporte"><Headphones size={17}/><span>Suporte</span></Link>
           <Link href="/cliente/configuracoes"><Settings size={17}/><span>Configurações</span></Link>
         </nav>
@@ -46,7 +46,7 @@ export default async function ClientDashboard() {
 
         <div className={styles.container}>
           <section className={styles.welcome}>
-            <div><span className={styles.eyebrow}>BEM-VINDO DE VOLTA</span><h1>Olá, {firstName}.</h1><p>Tudo certo por aqui. Acompanhe sua conexão, consulte seu plano e encontre suporte quando precisar.</p></div>
+            <div><span className={styles.eyebrow}>BEM-VINDO DE VOLTA</span><h1>Olá, {firstName}.</h1><p>Tudo certo por aqui. Acompanhe sua conexão, consulte seu contrato, faturas e encontre suporte quando precisar.</p></div>
             <div className={styles.accountStatus}><span className={styles.statusDot}/><span>Conta ativa</span><i/><span>Atendimento 24/7</span></div>
           </section>
 
@@ -63,17 +63,17 @@ export default async function ClientDashboard() {
           </section>
 
           <div className={styles.contentGrid}>
-            <section className={`${styles.card} ${styles.planCard}`}><div className={styles.cardHeader}><div><span>SEU SERVIÇO</span><h2>{session.plan}</h2></div><Link href="/planos" className={styles.link}>Ver detalhes <ArrowRight size={14}/></Link></div><div className={styles.planVisual}><div><div className={styles.planSpeed}>700 <span>Mbps</span></div><div className={styles.planName}>Fibra óptica Parque Net</div><div className={styles.planMeta}>Alta performance para streaming, trabalho e jogos.</div></div><div className={styles.planOrb} aria-hidden="true"><Wifi size={38}/></div></div><div className={styles.quality}><div className={styles.qualityHead}><span>Qualidade estimada da experiência</span><strong>Excelente</strong></div><div className={styles.bar}><div className={styles.fill}/></div></div></section>
+            <section className={`${styles.card} ${styles.planCard}`}><div className={styles.cardHeader}><div><span>SEU SERVIÇO</span><h2>{session.plan}</h2></div><Link href="/cliente/contrato" className={styles.link}>Ver contrato <ArrowRight size={14}/></Link></div><div className={styles.planVisual}><div><div className={styles.planSpeed}>700 <span>Mbps</span></div><div className={styles.planName}>Fibra óptica Parque Net</div><div className={styles.planMeta}>Alta performance para streaming, trabalho e jogos.</div></div><div className={styles.planOrb} aria-hidden="true"><Wifi size={38}/></div></div><div className={styles.quality}><div className={styles.qualityHead}><span>Qualidade estimada da experiência</span><strong>Excelente</strong></div><div className={styles.bar}><div className={styles.fill}/></div></div></section>
 
-            <section className={styles.card}><div className={styles.cardHeader}><div><span>PRÓXIMA AÇÃO</span><h2>Precisa resolver algo?</h2></div></div><div className={styles.actionList}>
+            <section className={styles.card}><div className={styles.cardHeader}><div><span>ACESSO RÁPIDO</span><h2>Resolva em poucos cliques</h2></div></div><div className={styles.actionList}>
+              <Link href="/cliente/faturas" className={styles.actionItem}><span className={styles.actionIcon}><ReceiptText size={16}/></span><span><strong>Segunda via de fatura</strong><small>Consulte cobranças e documentos</small></span><ArrowRight size={15}/></Link>
+              <Link href="/cliente/contrato" className={styles.actionItem}><span className={styles.actionIcon}><FileText size={16}/></span><span><strong>Meu contrato</strong><small>Veja condições e dados do serviço</small></span><ArrowRight size={15}/></Link>
               <Link href="/suporte" className={styles.actionItem}><span className={styles.actionIcon}><LifeBuoy size={16}/></span><span><strong>Falar com suporte</strong><small>Abra uma solicitação de atendimento</small></span><ArrowRight size={15}/></Link>
-              <Link href="/cliente/financeiro" className={styles.actionItem}><span className={styles.actionIcon}><CreditCard size={16}/></span><span><strong>Ver financeiro</strong><small>Consulte sua situação e documentos</small></span><ArrowRight size={15}/></Link>
-              <Link href="/cliente/configuracoes" className={styles.actionItem}><span className={styles.actionIcon}><Settings size={16}/></span><span><strong>Configurar conta</strong><small>Gerencie suas preferências</small></span><ArrowRight size={15}/></Link>
             </div></section>
 
             <section className={styles.card}><div className={styles.cardHeader}><div><span>ATIVIDADE</span><h2>Últimas atualizações</h2></div><span className={styles.updated}>Atualizado agora</span></div><div className={styles.activity}>{activityItems.map((item)=>{const Icon=item.icon;return <div className={styles.activityItem} key={item.title}><div className={styles.activityIcon}><Icon size={15}/></div><div><strong>{item.title}</strong><p>{item.description}</p></div><time>{item.time}</time></div>})}</div></section>
 
-            <section className={`${styles.card} ${styles.financeCard}`}><div className={styles.cardHeader}><div><span>FINANCEIRO</span><h2>Conta em dia</h2></div><CreditCard size={19}/></div><div className={styles.financeValue}>Tudo certo</div><p>Não há nenhuma pendência financeira disponível nesta conta de demonstração.</p><Link href="/cliente/financeiro" className={styles.financeLink}>Abrir financeiro <ArrowRight size={14}/></Link><span className={styles.demoTag}>DADOS DE DEMONSTRAÇÃO</span></section>
+            <section className={`${styles.card} ${styles.financeCard}`}><div className={styles.cardHeader}><div><span>FINANCEIRO</span><h2>Controle suas faturas</h2></div><CreditCard size={19}/></div><div className={styles.financeValue}>Acesso disponível</div><p>Consulte vencimentos, pagamentos e segunda via na área financeira autenticada.</p><Link href="/cliente/financeiro" className={styles.financeLink}>Abrir financeiro <ArrowRight size={14}/></Link></section>
 
             <section className={`${styles.card} ${styles.support}`}><div><span className={styles.supportEyebrow}>PRECISA DE AJUDA?</span><h2>Estamos aqui.</h2><p>Resolva problemas de conexão, tire dúvidas ou solicite atendimento especializado.</p></div><Link href="/suporte">Abrir suporte <ArrowRight size={15}/></Link></section>
           </div>
