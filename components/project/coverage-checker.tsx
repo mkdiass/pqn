@@ -1,8 +1,112 @@
 "use client";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, Loader2, MapPin, Search, XCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getAddressByCep } from "@/lib/cep";
 import { checkCoverage } from "@/lib/coverage";
+import { plans } from "@/data/plans";
 
-export function CoverageChecker(){const router=useRouter();const[cep,setCep]=useState("");const[number,setNumber]=useState("");const[address,setAddress]=useState<{street:string;neighborhood:string;city:string;state:string}|null>(null);const[loading,setLoading]=useState(false);const[error,setError]=useState("");const[result,setResult]=useState<boolean|null>(null);async function search(){const clean=cep.replace(/\D/g,"");setError("");setResult(null);if(clean.length!==8){setError("Digite um CEP válido com 8 números.");return}setLoading(true);try{const data=await getAddressByCep(clean);if(!data){setError("CEP não encontrado. Confira os números e tente novamente.");return}setAddress(data)}catch{setError("Não foi possível consultar o CEP agora.")}finally{setLoading(false)}}function check(){if(!address){setError("Consulte seu CEP primeiro.");return}if(!number.trim()){setError("Informe o número do endereço.");return}setError("");const available=checkCoverage(address);setResult(available)}return <div className="pp-card" style={{maxWidth:820,margin:"auto",padding:32}}><div style={{display:"flex",alignItems:"center",gap:12,marginBottom:24}}><div className="pp-card-icon" style={{margin:0}}><MapPin size={22}/></div><div><strong style={{display:"block",color:"#081522"}}>Consulte seu endereço</strong><span style={{fontSize:12,color:"#64748b"}}>Descubra quais planos estão disponíveis para você.</span></div></div><div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:10}}><input value={cep} onChange={e=>setCep(e.target.value.replace(/\D/g,"").slice(0,8))} inputMode="numeric" placeholder="Digite seu CEP" style={{height:52,border:"1px solid #dce3ea",borderRadius:11,padding:"0 15px",font: "inherit"}}/><button className="pp-btn pp-btn-primary" type="button" onClick={search} disabled={loading}>{loading?<Loader2 className="pp-spin" size={18}/>:<Search size={18}/>} Buscar</button></div>{address&&<div style={{marginTop:18,padding:18,borderRadius:14,background:"#f7f9fb",border:"1px solid #e5eaf0"}}><strong>{address.street}</strong><p style={{fontSize:13,color:"#64748b",marginTop:5}}>{address.neighborhood} · {address.city}/{address.state}</p><div style={{display:"grid",gridTemplateColumns:"180px 1fr",gap:10,marginTop:15}}><input value={number} onChange={e=>setNumber(e.target.value.replace(/\D/g,""))} inputMode="numeric" placeholder="Número" style={{height:48,border:"1px solid #dce3ea",borderRadius:10,padding:"0 13px",font:"inherit"}}/><button className="pp-btn pp-btn-primary" type="button" onClick={check}>Verificar cobertura <ArrowRight size={17}/></button></div></div>}{error&&<p role="alert" style={{color:"#c2410c",fontSize:13,fontWeight:700,marginTop:14}}>{error}</p>}{result!==null&&<div style={{marginTop:20,padding:22,borderRadius:16,background:result?"#effcf4":"#fff7ef",border:`1px solid ${result?"#b7ebca":"#fed7aa"}`,display:"flex",gap:14,alignItems:"flex-start"}}>{result?<CheckCircle2 color="#16a34a" size={25}/>:<XCircle color="#ea580c" size={25}/>}<div><strong style={{fontSize:17}}>{result?"Temos cobertura no seu endereço.":"Ainda não temos cobertura neste endereço."}</strong><p style={{fontSize:13,color:"#64748b",lineHeight:1.6,margin:"6px 0 14px"}}>{result?"Ótima notícia. Você já pode conhecer os planos disponíveis para sua região.":"Cadastre seu interesse e acompanhe a expansão da nossa rede."}</p>{result?<button className="pp-btn pp-btn-primary" type="button" onClick={()=>router.push("/planos")}>Ver planos <ArrowRight size={16}/></button>:<a className="pp-btn pp-btn-ghost" style={{color:"#081522",border:"1px solid #dce3ea"}} href="https://wa.me/5511987654321">Falar com atendimento</a>}</div></div>}</div>}
+export function CoverageChecker() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedPlanId = searchParams.get("plano");
+  const selectedPlan = plans.find((plan) => plan.id === selectedPlanId);
+  const [cep, setCep] = useState("");
+  const [number, setNumber] = useState("");
+  const [address, setAddress] = useState<{ street: string; neighborhood: string; city: string; state: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setResult(null);
+    setError("");
+  }, [cep]);
+
+  async function search() {
+    const clean = cep.replace(/\D/g, "");
+    setError("");
+    setResult(null);
+    setAddress(null);
+    if (clean.length !== 8) {
+      setError("Digite um CEP válido com 8 números.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await getAddressByCep(clean);
+      if (!data) {
+        setError("CEP não encontrado. Confira os números e tente novamente.");
+        return;
+      }
+      setAddress(data);
+    } catch {
+      setError("Não foi possível consultar o CEP agora.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function check() {
+    if (!address) {
+      setError("Consulte seu CEP primeiro.");
+      return;
+    }
+    if (!number.trim()) {
+      setError("Informe o número do endereço.");
+      return;
+    }
+    setError("");
+    setResult(checkCoverage(address));
+  }
+
+  return (
+    <div className="coverage-checker">
+      {selectedPlan && (
+        <div className="coverage-selected-plan">
+          <div><span>PLANO SELECIONADO</span><strong>{selectedPlan.name}</strong></div>
+          <div className="coverage-selected-speed">{selectedPlan.speedMbps >= 1000 ? "1 Gbps" : `${selectedPlan.speedMbps} Mbps`}</div>
+        </div>
+      )}
+
+      <div className="coverage-heading">
+        <div className="pp-card-icon"><MapPin size={22} /></div>
+        <div><strong>Consulte seu endereço</strong><span>Descubra quais planos estão disponíveis para você.</span></div>
+      </div>
+
+      <div className="coverage-search">
+        <label htmlFor="cep">CEP</label>
+        <div className="coverage-search-row">
+          <input id="cep" value={cep} onChange={(event) => setCep(event.target.value.replace(/\D/g, "").slice(0, 8))} inputMode="numeric" autoComplete="postal-code" placeholder="00000-000" maxLength={8} />
+          <button className="pp-btn pp-btn-primary" type="button" onClick={search} disabled={loading}>{loading ? <Loader2 className="pp-spin" size={18} /> : <Search size={18} />} Buscar</button>
+        </div>
+      </div>
+
+      {address && (
+        <div className="coverage-address">
+          <span className="coverage-address-label">ENDEREÇO ENCONTRADO</span>
+          <strong>{address.street}</strong>
+          <p>{address.neighborhood} · {address.city}/{address.state}</p>
+          <div className="coverage-number-row">
+            <div><label htmlFor="number">Número</label><input id="number" value={number} onChange={(event) => setNumber(event.target.value.replace(/\D/g, ""))} inputMode="numeric" autoComplete="street-address" placeholder="Ex.: 143" /></div>
+            <button className="pp-btn pp-btn-primary" type="button" onClick={check}>Verificar cobertura <ArrowRight size={17} /></button>
+          </div>
+        </div>
+      )}
+
+      {error && <p className="coverage-error" role="alert">{error}</p>}
+
+      {result !== null && (
+        <div className={`coverage-result ${result ? "available" : "unavailable"}`} role="status">
+          {result ? <CheckCircle2 size={26} /> : <XCircle size={26} />}
+          <div>
+            <strong>{result ? "Temos cobertura no seu endereço." : "Ainda não temos cobertura neste endereço."}</strong>
+            <p>{result ? "Ótima notícia. Você já pode seguir para a escolha do seu plano." : "Cadastre seu interesse com nosso atendimento e acompanhe a expansão da rede."}</p>
+            {result ? <button className="pp-btn pp-btn-primary" type="button" onClick={() => router.push(selectedPlan ? `/planos?selecionado=${selectedPlan.id}` : "/planos")}>{selectedPlan ? "Continuar contratação" : "Ver planos"} <ArrowRight size={16} /></button> : <a className="pp-btn pp-btn-ghost" style={{ color: "#081522", border: "1px solid #dce3ea" }} href="https://wa.me/5511987654321">Falar com atendimento</a>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
