@@ -63,7 +63,7 @@ export default async function ClientDashboard() {
         <div className={styles.container}>
           <section className={styles.welcome}>
             <div><span className={styles.eyebrow}>BEM-VINDO DE VOLTA</span><h1>Olá, {firstName}.</h1><p>Tudo certo por aqui. Acompanhe sua conexão, consulte seu contrato, faturas e encontre suporte quando precisar.</p></div>
-            <div className={styles.accountStatus}><span className={styles.statusDot}/><span>Conta ativa</span><i/><span>Atendimento 24/7</span></div>
+            <div className={styles.accountStatus}><span className={styles.statusDot}/><span>Conta ativa</span><i/><span>Suporte online</span></div>
           </section>
 
           <section className={styles.heroStatus} aria-labelledby="connection-title">
