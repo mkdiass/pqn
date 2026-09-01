@@ -22,6 +22,7 @@ export function PlansGrid() {
           {plans.map((plan) => (
             <PlanCard
               key={plan.id}
+              id={plan.id}
               speed={plan.speedMbps}
               price={plan.price.toFixed(2).replace(".", ",")}
               description={plan.description}
